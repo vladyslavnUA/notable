@@ -4,10 +4,19 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.http.response import JsonResponse
 from rest_framework.parsers import JSONParser 
+from rest_framework.request import Request
+from rest_framework.test import APIRequestFactory
 
 class DoctorViewSet(viewsets.ModelViewSet):
     queryset = Doctor.objects.all()
     serializer_class = DoctorSerializer
+
+factory = APIRequestFactory()
+request = factory.get('/')
+
+serializer_context = {
+    'request': Request(request),
+}
 
 @api_view(['GET', 'PUT', 'DELETE'])
 def appointment(request, uniqueID):
@@ -17,7 +26,7 @@ def appointment(request, uniqueID):
         return JsonResponse({'message': 'The appointment does not exist'}, status=status.HTTP_404_NOT_FOUND) 
  
     if request.method == 'GET': 
-        appointment_serializer = AppointmentSerializer(appointment) 
+        appointment_serializer = AppointmentSerializer(appointment, context=serializer_context) 
         return JsonResponse(appointment_serializer.data) 
  
     elif request.method == 'PUT': 
